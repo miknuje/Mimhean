@@ -1,0 +1,9 @@
+kivy 
+mysql-connector-python 
+nltk 
+spacy 
+tensorflow 
+torch 
+gtts 
+pyttsx3 
+SpeechRecognition
