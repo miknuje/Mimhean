@@ -3,8 +3,11 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from src.database import salvar_roteiro, obter_roteiros
-from src.utils import falar, ouvir
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+from database import salvar_roteiro, obter_roteiros
+from utils import falar, ouvir
 
 class MimheanApp(App):
     def build(self):
