@@ -1,23 +1,36 @@
 import mysql.connector
 
 # Configuração da conexão ao MySQL
-def conectar():
-    return mysql.connector.connect(
-        host="localhost",  # Alterar se necessário
-        user="root",       # Usuário padrão do MySQL
-        password="",       # Alterar se tiver senha configurada
-        database="mimhean_db"  # Certifique-se de usar o nome correto da base de dados
-    )
+def conectar(usar_bd=True):
+    if usar_bd:
+        return mysql.connector.connect(
+            host="localhost",  # Alterar se necessário
+            user="root",       # Usuário padrão do MySQL
+            password="",       # Alterar se tiver senha configurada
+            database="mimhean_db"  # Nome da base de dados
+        )
+    else:
+        return mysql.connector.connect(
+            host="localhost",  # Alterar se necessário
+            user="root",       # Usuário padrão do MySQL
+            password=""        # Alterar se tiver senha configurada
+        )
 
 # Função para criar a base de dados e tabelas
 def inicializar_bd():
     try:
-        conexao = conectar()
+        # Conecta sem especificar o banco de dados
+        conexao = conectar(usar_bd=False)
         cursor = conexao.cursor()
 
         # Criação da base de dados
         cursor.execute("CREATE DATABASE IF NOT EXISTS mimhean_db")
-        cursor.execute("USE mimhean_db")
+
+        # Agora conecta ao banco criado para criar as tabelas
+        cursor.close()
+        conexao.close()
+        conexao = conectar()
+        cursor = conexao.cursor()
 
         # Tabela para roteiros
         cursor.execute('''
@@ -45,7 +58,7 @@ def inicializar_bd():
     except mysql.connector.Error as err:
         print(f"Erro ao conectar ao MySQL: {err}")
     finally:
-        if conexao.is_connected():
+        if 'conexao' in locals() and conexao.is_connected():
             cursor.close()
             conexao.close()
 
@@ -64,7 +77,7 @@ def salvar_roteiro(titulo, texto):
     except mysql.connector.Error as err:
         print(f"Erro ao salvar roteiro: {err}")
     finally:
-        if conexao.is_connected():
+        if 'conexao' in locals() and conexao.is_connected():
             cursor.close()
             conexao.close()
 
@@ -92,7 +105,7 @@ def obter_roteiros():
         print(f"Erro ao obter roteiros: {err}")
         return []
     finally:
-        if conexao.is_connected():
+        if 'conexao' in locals() and conexao.is_connected():
             cursor.close()
             conexao.close()
 
