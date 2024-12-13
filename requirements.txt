@@ -7,3 +7,6 @@ torch
 gtts 
 pyttsx3 
 SpeechRecognition
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
