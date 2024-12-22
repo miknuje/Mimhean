@@ -1,0 +1,51 @@
+<ScreenManager>:
+    MainScreen:
+        name:"mainscreen"
+    RegisterScreen:
+        name: "registerscreen"
+    LoginScreen:
+        name: "loginscreen"
+
+<MainScreen>:
+    canvas:
+        Color:
+            rgba: 67, 67, 67, 0.8
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: "vertical"
+        padding: 30, 20
+        spacing: 100
+        BoxLayout:
+            orientation: "vertical"
+            spacing: 5
+            size_hint_y: 1
+            Image: 
+                source: "assets/mimhean.png"
+            Label: 
+                text: "Mimhean"
+                color: 0, 0, 0, 1
+                bold: True
+                font_size: 25
+                size_hint_y: None
+                height: 20
+        BoxLayout:
+            orientation: "vertical"
+            spacing: 20
+            size_hint_y: 1
+            BotaoMenu:
+                text: "Login"
+            BotaoMenu:
+                text: "Registar"
+<BotaoMenu@ButtonBehavior+Label>:
+    canvas.before:
+        Color:
+            rgba: 0.3, 0.7, 1, 0.8
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [20]
+    bold: True
+    font_size: 20
+    color: 0, 0, 0, 1

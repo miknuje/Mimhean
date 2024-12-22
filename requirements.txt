@@ -5,8 +5,10 @@ spacy
 tensorflow 
 torch 
 gtts 
+requests
 pyttsx3 
 SpeechRecognition
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
+requests-oauthlib

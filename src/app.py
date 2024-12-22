@@ -2,6 +2,7 @@ from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from database import salvar_roteiro, obter_roteiros
 from utils import falar, ouvir
+from flask import Flask, request, jsonify
 
 class MimheanApp(App):
     def build(self):
@@ -25,6 +26,19 @@ class Interface(BoxLayout):
             self.ids.resultado_label.text = f"Comando ouvido: {comando}"
         else:
             self.ids.resultado_label.text = "Não foi possível ouvir."
+
+app = Flask(__name__)
+
+@app.route('/registar_google', methods=['POST'])
+def registar_google():
+    token = request.json.get('token')
+    if not token:
+        return jsonify({"message": "Token não fornecido"}), 400
+    # Processar o token
+    return jsonify({"message": "Registro bem-sucedido com Google"}), 200
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=5000)
 
 if __name__ == '__main__':
     MimheanApp().run()
