@@ -1,0 +1,314 @@
+kv = """
+ScreenManager:
+    MainMenuScreen:
+    LoginScreen:
+    RegisterScreen:
+    ChatScreen:
+
+<MainMenuScreen>:
+    name: "mainmenu"
+    canvas:
+        Color:
+            rgba: 36/255, 35/255, 35/255, 1 
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        padding: 20
+        spacing: 20
+        orientation: "vertical"
+        FloatLayout:
+            Image:
+                source: 'assets/images/logo.png'
+                size_hint: None, None
+                size: 200, 200
+                pos_hint: {"center_x": 0.5, "center_y": 0.7}
+
+        MDLabel:
+            text: "Welcome to Mimhean"
+            halign: "center"
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+            font_style: "Roboto"
+            size_hint: (1, None)
+            height: 50
+            pos_hint: {"center_x": 0.5}
+            font_size: 22
+
+        BoxLayout:
+            orientation: "vertical"
+            spacing: 20
+            size_hint_y: None
+            height: self.minimum_height
+            pos_hint: {"center_x": 0.5, "center_y": 0.3}
+
+            MDFillRoundFlatButton:
+                text: "Login"
+                font_name: "assets/fonts/Roboto-Bold.ttf"
+                font_size: 18
+                md_bg_color: 94/255, 107/255, 145/255, 1
+                text_color: 1, 1, 1, 1
+                size_hint_x: 0.6
+                pos_hint: {"center_x": 0.5}
+                on_release:
+                    app.root.current = "login"
+                    app.root.transition.direction = "left"
+
+            MDFillRoundFlatButton:
+                text: "Register"
+                font_name: "assets/fonts/Roboto-Bold.ttf"
+                font_size: 18
+                md_bg_color: 94/255, 107/255, 145/255, 1
+                text_color: 1, 1, 1, 1
+                size_hint_x: 0.6
+                pos_hint: {"center_x": 0.5}
+                on_release:
+                    app.root.current = "register"
+                    app.root.transition.direction = "left"
+
+<LoginScreen>:
+    name: "login"
+    canvas:
+        Color:
+            rgba: 36/255, 35/255, 35/255, 1 
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: "vertical"
+        spacing: 20
+        padding: 20
+
+        MDLabel:
+            text: "Login"
+            halign: "center"
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+            font_style: "Roboto"
+            font_size: 22
+
+        MDTextField:
+            id: username
+            hint_text: "Username"
+            mode: "fill"
+            color_mode: 'custom'
+            helper_text: "Write your username here!"
+            pos_hint: {"center_y": .5}
+            line_color_focus: 0, 0, 0, 1
+            text_color_focus: 0, 0, 0, 1
+            hint_text_color_focus: 0, 0, 0, 1
+            helper_text_color_focus: 1, 1, 1, 1
+            font_style: "Roboto"
+        
+        MDTextField:
+            id: password
+            hint_text: "Password"
+            mode: "fill"
+            password: True
+            color_mode: 'custom'
+            helper_text: "Write your password here!"
+            pos_hint: {"center_y": .5}
+            line_color_focus: 0, 0, 0, 1
+            text_color_focus: 0, 0, 0, 1
+            hint_text_color_focus: 0, 0, 0, 1
+            helper_text_color_focus: 1, 1, 1, 1
+            font_style: "Roboto"
+
+        MDFillRoundFlatButton:
+            text: "Submit"
+            font_size: 18
+            md_bg_color: 94/255, 107/255, 145/255, 1
+            text_color: 1, 1, 1, 1
+            size_hint_x: 0.6
+            pos_hint: {"center_x": 0.5}
+            font_name: "assets/fonts/Roboto-Bold.ttf"
+            on_release: 
+                root.login_user() 
+                app.root.transition.direction = "left"
+
+        MDFillRoundFlatButton:
+            text: "Back"
+            font_size: 18
+            md_bg_color: 94/255, 107/255, 145/255, 1
+            text_color: 1, 1, 1, 1
+            size_hint_x: 0.6
+            pos_hint: {"center_x": 0.5}
+            font_name: "assets/fonts/Roboto-Bold.ttf"
+            on_release:
+                app.root.current = "mainmenu"
+                app.root.transition.direction = "right"
+
+<RegisterScreen>:
+    name: "register"
+    canvas:
+        Color:
+            rgba: 36/255, 35/255, 35/255, 1 
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: "vertical"
+        spacing: 20
+        padding: 20
+
+        MDLabel:
+            text: "Register"
+            halign: "center"
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+            font_style: "Roboto"
+            font_size: 22
+
+        MDTextField:
+            id: email
+            hint_text: "Email"
+            mode: "fill"
+            color_mode: 'custom'
+            helper_text: "Write your email here!"
+            pos_hint: {"center_y": .5}
+            line_color_focus: 0, 0, 0, 1
+            text_color_focus: 0, 0, 0, 1
+            hint_text_color_focus: 0, 0, 0, 1
+            helper_text_color_focus: 1, 1, 1, 1
+            font_style: "Roboto"
+
+        MDTextField:
+            id: username
+            hint_text: "Username"
+            mode: "fill"
+            color_mode: 'custom'
+            helper_text: "Write your username here!"
+            pos_hint: {"center_y": .5}
+            line_color_focus: 0, 0, 0, 1
+            text_color_focus: 0, 0, 0, 1
+            hint_text_color_focus: 0, 0, 0, 1
+            helper_text_color_focus: 1, 1, 1, 1
+            font_style: "Roboto"
+
+        MDTextField:
+            id: password
+            hint_text: "Password"
+            mode: "fill"
+            password: True
+            color_mode: 'custom'
+            helper_text: "Write your password here!"
+            pos_hint: {"center_y": .5}
+            line_color_focus: 0, 0, 0, 1
+            text_color_focus: 0, 0, 0, 1
+            hint_text_color_focus: 0, 0, 0, 1
+            helper_text_color_focus: 1, 1, 1, 1
+            font_style: "Roboto"
+
+        MDTextField:
+            id: passconf
+            hint_text: "Confirm Password"
+            mode: "fill"
+            password: True
+            color_mode: 'custom'
+            helper_text: "Write again your password here!"
+            pos_hint: {"center_y": .5}
+            line_color_focus: 0, 0, 0, 1
+            text_color_focus: 0, 0, 0, 1
+            hint_text_color_focus: 0, 0, 0, 1
+            helper_text_color_focus: 1, 1, 1, 1
+            font_style: "Roboto"
+
+        MDFillRoundFlatButton:
+            text: "Submit"
+            font_size: 18
+            md_bg_color: 94/255, 107/255, 145/255, 1
+            text_color: 1, 1, 1, 1
+            size_hint_x: 0.6
+            pos_hint: {"center_x": 0.5}
+            font_name: "assets/fonts/Roboto-Bold.ttf"
+            on_release: 
+                root.register_user()
+                app.root.transition.direction = "left"
+
+        MDFillRoundFlatButton:
+            text: "Back"
+            font_size: 18
+            md_bg_color: 94/255, 107/255, 145/255, 1
+            text_color: 1, 1, 1, 1
+            size_hint_x: 0.6
+            pos_hint: {"center_x": 0.5}
+            font_name: "assets/fonts/Roboto-Bold.ttf"
+            on_release:
+                app.root.current = "mainmenu"
+                app.root.transition.direction = "right"
+
+<ChatScreen>:
+    name: "chat"
+    canvas:
+        Color:
+            rgba: 36/255, 35/255, 35/255, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: "vertical"
+        spacing: 10
+        padding: 10
+
+        MDTopAppBar:
+            title: "Dashboard"
+            left_action_items: [["logout", lambda x: app.logout()]]
+            right_action_items: [["menu", lambda x: app.show_commands()]]
+            elevation: 10
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: 20
+            spacing: 20
+
+            ScrollView:
+                MDBoxLayout:
+                    id: chat_history
+                    orientation: "vertical"
+                    spacing: 10
+                    size_hint_y: None
+                    height: self.minimum_height
+
+            BoxLayout:
+                size_hint_y: None
+                height: 50
+                spacing: 10
+
+                MDTextField:
+                    id: user_input
+                    hint_text: "Digite sua mensagem..."
+                    mode: "fill"
+                    size_hint_x: 0.8
+                    multiline: False
+
+                MDFillRoundFlatButton:
+                    text: "Enviar"
+                    size_hint_x: 0.2
+                    md_bg_color: 94/255, 107/255, 145/255, 1
+                    text_color: 1, 1, 1, 1
+                    on_release: app.send_message()
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: 10
+            padding: 10
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            MDLabel:
+                text: "Comandos disponíveis:"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+                font_style: "H1"
+                font_size: 16
+
+            ScrollView:
+                MDList:
+                    id: command_list
+"""
