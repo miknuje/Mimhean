@@ -246,20 +246,34 @@ ScreenManager:
             pos: self.pos
             size: self.size
     BoxLayout:
-        orientation: "vertical"
-        spacing: 10
-        padding: 10
+        orientation: "horizontal"
 
-        MDTopAppBar:
-            title: "Dashboard"
-            left_action_items: [["logout", lambda x: app.logout()]]
-            right_action_items: [["menu", lambda x: app.show_commands()]]
-            elevation: 10
+        MDNavigationDrawer:
+            id: drawer
+            size_hint_x: 0.6
+
+            BoxLayout:
+                orientation: "vertical"
+                spacing: 10
+                padding: 10
+
+                MDLabel:
+                    text: "Conversas"
+                    font_style: "H5"
+                    size_hint_y: None
+                    height: 40
+
+                ScrollView:
+                    MDList:
+                        id: lista_conversas
 
         BoxLayout:
             orientation: "vertical"
-            padding: 20
-            spacing: 20
+
+            MDTopAppBar:
+                title: "Mimhean"
+                left_action_items: [["menu", lambda x: app.root.ids.drawer.set_state("open")]]
+                right_action_items: [["logout", lambda x: app.logout()]]
 
             ScrollView:
                 MDBoxLayout:
@@ -284,31 +298,5 @@ ScreenManager:
                 MDFillRoundFlatButton:
                     text: "Enviar"
                     size_hint_x: 0.2
-                    md_bg_color: 94/255, 107/255, 145/255, 1
-                    text_color: 1, 1, 1, 1
                     on_release: app.send_message()
-
-        BoxLayout:
-            orientation: "vertical"
-            size_hint_y: None
-            height: self.minimum_height
-            spacing: 10
-            padding: 10
-            canvas.before:
-                Color:
-                    rgba: 1, 1, 1, 0.1
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-            MDLabel:
-                text: "Comandos disponíveis:"
-                theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
-                font_style: "H1"
-                font_size: 16
-
-            ScrollView:
-                MDList:
-                    id: command_list
 """

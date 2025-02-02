@@ -8,12 +8,13 @@ from kivymd.uix.toolbar import MDTopAppBar
 from kivymd.uix.label import MDLabel
 from mysql.connector import errorcode
 from kivymd.toast import toast
+from kivymd.uix.list import OneLineListItem
 
 config = {
     'user': 'root',  # Substitua pelo seu utilizador MySQL
     'password': '',  # Substitua pela sua senha
     'host': 'localhost',  # Ou o IP do servidor MySQL
-    'database': 'mimhean',  # Nome do Base de dados
+    'database': 'mimhean',  # Nome da Base de dados
 }
 
 def connect_db():
@@ -85,7 +86,7 @@ class RegisterScreen(Screen):
         try:
             cursor.execute(query, (username, email, password))
             cnx.commit()
-            toast("Usuário registrado com sucesso!")
+            toast("Utilizador registrado com sucesso!")
             self.manager.current = "login"
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_DUP_ENTRY:
@@ -119,9 +120,40 @@ class Mimhean(MDApp):
         })
         self.title = "Mimhean"
         return Builder.load_string(kv)
-    
+    def exibir_conversas(self):
+        """Lista todas as conversas do utilizador."""
+        id_utilizador = self.app.utilizador_atual  # tenho que salvar
+        conversas = self.app.carregar_conversas(id_utilizador)
+
+        lista_conversas = self.ids.lista_conversas  # Criar um ID no layout
+        lista_conversas.clear_widgets()
+
+        for conversa in conversas:
+            item = OneLineListItem(
+                text=conversa["titulo"],
+                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.carregar_conversa(id_conversa)
+            )
+            lista_conversas.add_widget(item)
+
+    def carregar_conversa(self, id_conversa):
+        """Carrega mensagens da conversa selecionada."""
+        mensagens = self.app.carregar_mensagens(id_conversa)
+        chat_history = self.ids.chat_history
+        chat_history.clear_widgets()
+
+        for msg in mensagens:
+            chat_history.add_widget(
+                MDLabel(
+                    text=f"Utilizador: {msg['mensagem_utilizador']}\nIA: {msg['resposta_ia']}",
+                    size_hint_y=None,
+                    height=30,
+                    text_color=(1, 1, 1, 1),
+                    halign="left"
+                )
+            )
+
     def send_message(self):
-        """Envia uma mensagem para o chat."""
+        """Envia uma mensagem e a salva na conversa ativa."""
         chat_screen = self.root.get_screen("chat")
         user_input = chat_screen.ids.user_input.text.strip()
 
@@ -129,36 +161,21 @@ class Mimhean(MDApp):
             toast("Digite algo antes de enviar!")
             return
 
+        id_utilizador = self.utilizador_atual
+        id_conversa = self.conversa_atual  # Deve ser definido ao abrir uma conversa
+
         chat_screen.display_message("Utilizador", user_input)
         response = self.get_ai_response(user_input)
         chat_screen.display_message("IA", response)
+
+        # Salvar na base de dados
+        self.salvar_mensagem(id_utilizador, id_conversa, user_input, response)
+
         chat_screen.ids.user_input.text = ""
 
     def get_ai_response(self, user_input):
         """Simula uma resposta da IA."""
         return f"Resposta simulada para: {user_input}"
-
-    def show_commands(self):
-        """Mostra os comandos disponíveis na tela."""
-        commands = [
-            "Olá - Gera uma saudação",
-            "Ajuda - Mostra a lista de comandos",
-            "Sair - Encerra a sessão",
-        ]
-
-        command_list = self.root.get_screen("chat").ids.command_list
-        command_list.clear_widgets()
-
-        for command in commands:
-            command_list.add_widget(
-                MDLabel(
-                    text=f"- {command}",
-                    theme_text_color="Custom",
-                    text_color=(1, 1, 1, 1),
-                    size_hint_y=None,
-                    height=30,
-                )
-            )
 
     def logout(self):
         """Desconecta o utilizador e retorna à tela de login."""
