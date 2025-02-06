@@ -275,19 +275,21 @@ ScreenManager:
                         
                         MDTextField:
                             id: user_input
-                            hint_text: "Digite sua mensagem..."
+                            hint_text: "Write your message..."
+                            helper_text: "Write your message here!"
                             mode: "fill"
                             size_hint_x: 0.8
                             multiline: False
-                            line_color_focus: 1, 1, 1, 1
-                            text_color_focus: 1, 1, 1, 1
-                            hint_text_color_focus: 1, 1, 1, 1
+                            line_color_focus: 0, 0, 0, 1
+                            text_color_focus: 0, 0, 0, 1
+                            hint_text_color_focus: 0, 0, 0, 1
+                            helper_text_color_focus: 1, 1, 1, 1
                             md_bg_color: 94/255, 107/255, 145/255, 1
                             text_color: 1, 1, 1, 1
                             font_style: "Roboto"
                         
                         MDFillRoundFlatButton:
-                            text: "Enviar"
+                            text: "Send"
                             size_hint_x: 0.2
                             md_bg_color: 94/255, 107/255, 145/255, 1
                             text_color: 1, 1, 1, 1
@@ -309,7 +311,7 @@ ScreenManager:
                 padding: 10
 
                 MDLabel:
-                    text: "Conversas"
+                    text: "Chat's"
                     font_style: "H5"
                     size_hint_y: None
                     height: 40
@@ -317,7 +319,7 @@ ScreenManager:
                     text_color: 1, 1, 1, 1
                 
                 MDRaisedButton:
-                    text: "Nova Conversa"
+                    text: "New Chat"
                     md_bg_color: 94/255, 107/255, 145/255, 1
                     text_color: 1, 1, 1, 1
                     size_hint_x: 0.9
