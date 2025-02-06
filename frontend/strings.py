@@ -241,16 +241,68 @@ ScreenManager:
     name: "chat"
     canvas:
         Color:
-            rgba: 36/255, 35/255, 35/255, 1
+            rgba: 36/255, 35/255, 35/255, 1 
         Rectangle:
             pos: self.pos
             size: self.size
-    BoxLayout:
-        orientation: "horizontal"
-
+    
+    MDNavigationLayout:
+        ScreenManager:
+            Screen:
+                BoxLayout:
+                    orientation: "vertical"
+                    
+                    MDTopAppBar:
+                        title: "Mimhean"
+                        left_action_items: [["menu", lambda x: nav_drawer.set_state("toggle")]]
+                        right_action_items: [["logout", lambda x: app.logout()]]
+                        md_bg_color: 94/255, 107/255, 145/255, 1
+                        specific_text_color: 1, 1, 1, 1
+                    
+                    ScrollView:
+                        MDBoxLayout:
+                            id: chat_history
+                            orientation: "vertical"
+                            spacing: 10
+                            size_hint_y: None
+                            height: self.minimum_height
+                            padding: 10
+                            
+                    BoxLayout:
+                        size_hint_y: None
+                        height: 60
+                        spacing: 10
+                        padding: [10, 5]
+                        
+                        MDTextField:
+                            id: user_input
+                            hint_text: "Digite sua mensagem..."
+                            mode: "fill"
+                            size_hint_x: 0.8
+                            multiline: False
+                            line_color_focus: 1, 1, 1, 1
+                            text_color_focus: 1, 1, 1, 1
+                            hint_text_color_focus: 1, 1, 1, 1
+                            md_bg_color: 94/255, 107/255, 145/255, 1
+                            text_color: 1, 1, 1, 1
+                            font_style: "Roboto"
+                        
+                        MDFillRoundFlatButton:
+                            text: "Enviar"
+                            size_hint_x: 0.2
+                            md_bg_color: 94/255, 107/255, 145/255, 1
+                            text_color: 1, 1, 1, 1
+                            on_release: app.send_message()
+        
         MDNavigationDrawer:
-            id: drawer
+            id: nav_drawer
             size_hint_x: 0.6
+            canvas:
+                Color:
+                    rgba: 36/255, 35/255, 35/255, 1  
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
             BoxLayout:
                 orientation: "vertical"
@@ -262,41 +314,11 @@ ScreenManager:
                     font_style: "H5"
                     size_hint_y: None
                     height: 40
-
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                
                 ScrollView:
                     MDList:
                         id: lista_conversas
 
-        BoxLayout:
-            orientation: "vertical"
-
-            MDTopAppBar:
-                title: "Mimhean"
-                left_action_items: [["menu", lambda x: app.root.ids.drawer.set_state("open")]]
-                right_action_items: [["logout", lambda x: app.logout()]]
-
-            ScrollView:
-                MDBoxLayout:
-                    id: chat_history
-                    orientation: "vertical"
-                    spacing: 10
-                    size_hint_y: None
-                    height: self.minimum_height
-
-            BoxLayout:
-                size_hint_y: None
-                height: 50
-                spacing: 10
-
-                MDTextField:
-                    id: user_input
-                    hint_text: "Digite sua mensagem..."
-                    mode: "fill"
-                    size_hint_x: 0.8
-                    multiline: False
-
-                MDFillRoundFlatButton:
-                    text: "Enviar"
-                    size_hint_x: 0.2
-                    on_release: app.send_message()
 """

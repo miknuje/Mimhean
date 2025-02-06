@@ -186,7 +186,7 @@ def main():
         # Criar Base de dados se não existir
         create_database(cursor)
 
-        # Selecionar o Base de dados
+        # Selecionar a Base de dados
         cnx.database = config['database']
         
         # Criar tabelas

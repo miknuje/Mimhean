@@ -46,4 +46,3 @@ def carregar_mensagens(self, id_conversa):
     cursor.close()
     db.close()
     return mensagens
-
