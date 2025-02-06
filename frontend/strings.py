@@ -255,7 +255,6 @@ ScreenManager:
                     MDTopAppBar:
                         title: "Mimhean"
                         left_action_items: [["menu", lambda x: nav_drawer.set_state("toggle")]]
-                        right_action_items: [["logout", lambda x: app.logout()]]
                         md_bg_color: 94/255, 107/255, 145/255, 1
                         specific_text_color: 1, 1, 1, 1
                     
@@ -299,7 +298,7 @@ ScreenManager:
             size_hint_x: 0.6
             canvas:
                 Color:
-                    rgba: 36/255, 35/255, 35/255, 1  
+                    rgba: 36/255, 35/255, 35/255, 1 
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -317,8 +316,25 @@ ScreenManager:
                     theme_text_color: "Custom"
                     text_color: 1, 1, 1, 1
                 
+                MDRaisedButton:
+                    text: "Nova Conversa"
+                    md_bg_color: 94/255, 107/255, 145/255, 1
+                    text_color: 1, 1, 1, 1
+                    size_hint_x: 0.9
+                    pos_hint: {"center_x": 0.5}
+                    on_release: app.create_conversation()
+                
                 ScrollView:
                     MDList:
                         id: lista_conversas
+                
+                MDFillRoundFlatButton:
+                    text: "Logout"
+                    md_bg_color: 255/255, 69/255, 58/255, 1
+                    text_color: 1, 1, 1, 1
+                    size_hint_x: 0.9
+                    pos_hint: {"center_x": 0.5}
+                    on_release: app.logout()
+
 
 """
