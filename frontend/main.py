@@ -10,6 +10,13 @@ from mysql.connector import errorcode
 from kivymd.toast import toast
 from kivymd.uix.list import OneLineListItem
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from backend.conversas import carregar_conversas
+
 config = {
     'user': 'root',  # Substitua pelo seu utilizador MySQL
     'password': '',  # Substitua pela sua senha
@@ -55,9 +62,11 @@ class LoginScreen(Screen):
         if user:
             toast(f"Bem-vindo, {user['nome']}!")
             self.manager.current = "chat"
+            app = MDApp.get_running_app()
+            app.utilizador_atual = user["id_utilizador"]
         else:
             toast("Utilizador ou senha incorretos")
-        
+
         cursor.close()
         cnx.close()
 
@@ -114,6 +123,8 @@ class ChatScreen(Screen):
 
 class Mimhean(MDApp):
     def build(self):
+        self.utilizador_atual = None
+        self.conversa_atual = None  
         self.theme_cls.font_styles.update({
             "Roboto": ["assets/fonts/Roboto-Regular.ttf", 16, False, 0.15],
             "RobotoBold": ["assets/fonts/Roboto-Bold.ttf", 18, True, 0.15],
@@ -173,6 +184,24 @@ class Mimhean(MDApp):
 
         chat_screen.ids.user_input.text = ""
 
+    def exibir_conversas(self):
+        """Lista todas as conversas do utilizador."""
+        if not self.utilizador_atual:
+            toast("Nenhum utilizador logado")
+            return
+
+        conversas = carregar_conversas(self.utilizador_atual)  # Obtém conversas do utilizador atual
+
+        lista_conversas = self.root.get_screen("chat").ids.lista_conversas
+        lista_conversas.clear_widgets()
+
+        for conversa in conversas:
+            item = OneLineListItem(
+                text=conversa["titulo"],
+                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.carregar_conversa(id_conversa)
+            )
+            lista_conversas.add_widget(item)
+    
     def get_ai_response(self, user_input):
         """Simula uma resposta da IA."""
         return f"Resposta simulada para: {user_input}"
@@ -181,8 +210,7 @@ class Mimhean(MDApp):
         """Desconecta o utilizador e retorna à tela de login."""
         self.root.current = "login"
         self.root.transition.direction = "right"
-        toast("Logout realizado com sucesso!")
-        
+        toast("Logout realizado com sucesso!")   
     
 if __name__ == '__main__':
     Mimhean().run()

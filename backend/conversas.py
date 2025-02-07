@@ -1,4 +1,4 @@
-from db import *
+from backend.db import *
 
 def criar_conversa(self, id_utilizador, titulo):
     """Cria uma nova conversa e retorna seu ID."""
