@@ -12,18 +12,27 @@ def criar_conversa(self, id_utilizador, titulo):
     db.close()
     return conversa_id
 
-def salvar_mensagem(self, id_utilizador, id_conversa, mensagem, resposta):
+def salvar_mensagem(id_utilizador, id_conversa, mensagem, resposta):
     """Salva a interação no base de dados."""
     db = connect_db()
     cursor = db.cursor()
+    if id_conversa is None:
+        # Criar uma nova conversa se não houver uma ativa
+        cursor.execute("INSERT INTO conversas (id_utilizador, titulo) VALUES (%s, %s)", (id_utilizador, "Nova Conversa"))
+        db.commit()
+        id_conversa = cursor.lastrowid
     sql = """
     INSERT INTO interacoes (id_utilizador, id_conversa, mensagem_utilizador, resposta_ia) 
     VALUES (%s, %s, %s, %s)
     """
-    cursor.execute(sql, (id_utilizador, id_conversa, mensagem, resposta))
-    db.commit()
-    cursor.close()
-    db.close()
+    if id_conversa is None:
+        toast("Erro: Nenhuma conversa selecionada")
+        return
+    else:
+        cursor.execute(sql, (id_utilizador, id_conversa, mensagem, resposta))
+        db.commit()
+        cursor.close()
+        db.close()
 
 def carregar_conversas(self, id_utilizador):
     """Recupera todas as conversas do utilizador."""

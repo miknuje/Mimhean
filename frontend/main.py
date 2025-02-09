@@ -9,6 +9,7 @@ from kivymd.uix.label import MDLabel
 from mysql.connector import errorcode
 from kivymd.toast import toast
 from kivymd.uix.list import OneLineListItem
+import g4f
 
 import sys
 import os
@@ -16,6 +17,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from backend.conversas import carregar_conversas
+from backend.conversas import salvar_mensagem
 
 config = {
     'user': 'root',  # Substitua pelo seu utilizador MySQL
@@ -173,7 +175,7 @@ class Mimhean(MDApp):
             return
 
         id_utilizador = self.utilizador_atual
-        id_conversa = self.conversa_atual  # Deve ser definido ao abrir uma conversa
+        id_conversa = self.conversa_atual
 
         chat_screen.display_message("Utilizador", user_input)
         response = self.get_ai_response(user_input)
@@ -183,6 +185,11 @@ class Mimhean(MDApp):
         self.salvar_mensagem(id_utilizador, id_conversa, user_input, response)
 
         chat_screen.ids.user_input.text = ""
+
+    def salvar_mensagem(self, id_utilizador, id_conversa, mensagem, resposta):
+        """Salva a interação na base de dados."""
+        from backend.conversas import salvar_mensagem  # Importação dentro do método para evitar dependências circulares
+        salvar_mensagem(id_utilizador, id_conversa, mensagem, resposta)
 
     def exibir_conversas(self):
         """Lista todas as conversas do utilizador."""
@@ -203,8 +210,11 @@ class Mimhean(MDApp):
             lista_conversas.add_widget(item)
     
     def get_ai_response(self, user_input):
-        """Simula uma resposta da IA."""
-        return f"Resposta simulada para: {user_input}"
+        response = g4f.ChatCompletion.create(
+        model=g4f.models.gpt_4,
+        messages=[{"role": "user", "content": user_input}]
+        )
+        return response
 
     def logout(self):
         """Desconecta o utilizador e retorna à tela de login."""
