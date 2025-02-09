@@ -1,3 +1,4 @@
+import re
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.core.window import Window
@@ -6,18 +7,25 @@ from strings import *
 import mysql.connector
 from kivymd.uix.toolbar import MDTopAppBar
 from kivymd.uix.label import MDLabel
+from kivymd.uix.card import MDCard
+from kivymd.uix.boxlayout import MDBoxLayout
 from mysql.connector import errorcode
 from kivymd.toast import toast
-from kivymd.uix.list import OneLineListItem
+from kivymd.uix.list import OneLineListItem, MDList
+from kivymd.uix.button import MDRaisedButton, MDIconButton
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.textfield import MDTextField
+from kivy.uix.scrollview import ScrollView
+import bcrypt
 import g4f
+from kivy.metrics import dp
 
 import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from backend.conversas import carregar_conversas
-from backend.conversas import salvar_mensagem
+from backend.conversas import carregar_conversas, criar_conversa, salvar_mensagem, salvar_titulo, excluir_conversa, carregar_mensagens
 
 config = {
     'user': 'root',  # Substitua pelo seu utilizador MySQL
@@ -57,15 +65,18 @@ class LoginScreen(Screen):
             return
 
         cursor = cnx.cursor(dictionary=True)
-        query = "SELECT * FROM utilizadores WHERE nome = %s AND senha = %s"
-        cursor.execute(query, (username, password))
+        query = "SELECT * FROM utilizadores WHERE nome = %s"
+        cursor.execute(query, (username,))
         user = cursor.fetchone()
 
         if user:
-            toast(f"Bem-vindo, {user['nome']}!")
-            self.manager.current = "chat"
-            app = MDApp.get_running_app()
-            app.utilizador_atual = user["id_utilizador"]
+            if bcrypt.checkpw(password.encode('utf-8'), user['senha'].encode('utf-8')):
+                toast(f"Bem-vindo, {user['nome']}!")
+                self.manager.current = "chat"
+                app = MDApp.get_running_app()
+                app.utilizador_atual = user["id_utilizador"]
+            else:
+                toast("Utilizador ou senha incorretos")
         else:
             toast("Utilizador ou senha incorretos")
 
@@ -75,6 +86,9 @@ class LoginScreen(Screen):
 class RegisterScreen(Screen):
     def register_user(self):
         email = self.ids.email.text.strip()
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            toast("Por favor, insira um e-mail válido.")
+            return
         username = self.ids.username.text.strip()
         password = self.ids.password.text.strip()
         passconf = self.ids.passconf.text.strip()
@@ -90,12 +104,13 @@ class RegisterScreen(Screen):
         cnx = connect_db()
         if cnx is None:
             return
-
+        password = self.ids.password.text.strip()
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         cursor = cnx.cursor()
         query = "INSERT INTO utilizadores (nome, email, senha) VALUES (%s, %s, %s)"
-
+        
         try:
-            cursor.execute(query, (username, email, password))
+            cursor.execute(query, (username, email, hashed_password))
             cnx.commit()
             toast("Utilizador registrado com sucesso!")
             self.manager.current = "login"
@@ -109,19 +124,151 @@ class RegisterScreen(Screen):
             cnx.close()
 
 class ChatScreen(Screen):
-    def display_message(self, sender, message):
-        """Exibe uma mensagem no chat."""
-        chat_history = self.ids.chat_history
-        chat_history.add_widget(
-            MDLabel(
-                text=f"{sender}: {message}",
-                theme_text_color="Custom",
-                text_color=(1, 1, 1, 1),
-                halign="left" if sender == "Utilizador" else "right",
-                size_hint_y=None,
-                height=30,
-            )
+    dialog = None  # Armazena a referência ao diálogo
+    def on_enter(self, *args):
+            self.exibir_conversas()
+
+    def editar_titulo(self, id_conversa, titulo_atual):
+        """Abre um diálogo para editar o título da conversa."""
+        self.dialog = MDDialog(
+            title="Editar Título",
+            type="custom",
+            content_cls=MDTextField(id="text_field", text=titulo_atual),
+            buttons=[
+                MDRaisedButton(text="Cancelar", on_release=lambda x: self.dialog.dismiss()),
+                MDRaisedButton(
+                    text="Salvar",
+                    on_release=lambda x: self.salvar_titulo(id_conversa, self.dialog.content_cls.text)
+                )
+            ]
         )
+        self.dialog.open()
+
+    def salvar_titulo(self, id_conversa, novo_titulo):
+        """Atualiza o título da conversa no banco de dados."""
+        salvar_titulo(id_conversa, novo_titulo)
+        self.dialog.dismiss()
+        self.carregar_conversas()  # Atualiza a lista de conversas
+
+    def enviar_mensagem(self):
+        """Captura a mensagem do usuário, envia para a IA e exibe a resposta."""
+        user_input = self.ids.user_input.text.strip()
+        if not user_input:
+            return  # Evita enviar mensagens vazias
+
+        id_conversa = self.ids.chat_screen.id_conversa  # Deve estar definido antes
+        resposta_ia = "Resposta gerada pela IA..."  # Aqui você chamaria a IA de fato
+
+        # Salvar no banco de dados
+        salvar_mensagem(self.id_utilizador, id_conversa, user_input, resposta_ia)
+
+        # Exibir no chat
+        self.display_message("Utilizador", user_input)
+        self.display_message("IA", resposta_ia)
+
+        # Limpar campo de entrada
+        self.ids.user_input.text = ""
+
+    def display_message(self, sender, message):
+        """Exibe uma mensagem no chat com balão ajustável e responsivo."""
+        chat_history = self.ids.chat_history
+        is_user = sender == "Utilizador"
+
+        message_container = MDBoxLayout(
+            size_hint_x=0.9,
+            padding=[5, 5, 5, 5],
+            adaptive_height=True,
+            pos_hint={"center_x": 0.8 if is_user else 0.2}
+        )
+
+        bubble = MDCard(
+            elevation=3,
+            radius=[15, 15, 0, 15] if is_user else [15, 15, 15, 0],
+            md_bg_color=(0.2, 0.6, 1, 1) if is_user else (0.2, 0.2, 0.2, 1),
+            padding=[10, 10],
+            size_hint_x=None,
+            adaptive_height=True
+        )
+
+        message_label = MDLabel(
+            text=message,
+            theme_text_color="Custom",
+            text_color=(1, 1, 1, 1),
+            halign="right" if is_user else "left",
+            size_hint_x=1,
+            size_hint_y=None,
+            text_size=(dp(250), None),
+        )
+
+        bubble.width = min(dp(250), dp(len(message) * 5))
+
+        bubble.add_widget(message_label)
+        message_container.add_widget(bubble)
+        chat_history.add_widget(message_container)
+
+    def carregar_conversas(self):
+        """Carrega a lista de conversas disponíveis no menu lateral."""
+        app = MDApp.get_running_app()
+        if not app.utilizador_atual:
+            toast("Nenhum utilizador logado")
+            return
+        lista_conversas = self.ids.lista_conversas
+        lista_conversas.clear_widgets()
+
+        conversas = carregar_conversas(app.utilizador_atual)
+        for conversa in conversas:
+            btn = MDRaisedButton(
+                text=conversa["titulo"],
+                size_hint_x=0.9,
+                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.carregar_conversa(id_conversa)
+            )
+            lista_conversas.add_widget(btn)
+            print(conversas)
+    
+    def exibir_conversas(self):
+        """Lista todas as conversas do utilizador."""
+        app = MDApp.get_running_app()
+        if not app.utilizador_atual:
+            toast("Nenhum utilizador logado")
+            return
+
+        conversas = carregar_conversas(app.utilizador_atual)
+        lista_conversas = self.ids.lista_conversas
+        lista_conversas.clear_widgets()
+
+        # Criação de um ScrollView para a lista de conversas
+        scroll_view = ScrollView(do_scroll_x=False, do_scroll_y=True)
+        scroll_layout = MDBoxLayout(orientation='vertical', size_hint_y=None)
+        scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
+
+        for conversa in conversas:
+            item_layout = MDBoxLayout(orientation='horizontal', size_hint_y=None, height="40dp")
+            
+            item = OneLineListItem(
+                text=conversa["titulo"],
+                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.carregar_conversa(id_conversa)
+            )
+            
+            btn_editar = MDIconButton(
+                icon="pencil",
+                on_release=lambda x, id_conversa=conversa["id_conversa"], titulo=conversa["titulo"]: self.editar_titulo(id_conversa, titulo)
+            )
+            
+            btn_excluir = MDIconButton(
+                icon="delete",
+                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.excluir_conversa(id_conversa)
+            )
+            
+            item_layout.add_widget(item)
+            item_layout.add_widget(btn_editar)
+            item_layout.add_widget(btn_excluir)
+            
+            # Adiciona o item de conversa no layout de rolagem
+            scroll_layout.add_widget(item_layout)
+
+        # Adiciona o layout de rolagem na tela
+        scroll_view.add_widget(scroll_layout)
+        lista_conversas.add_widget(scroll_view)
 
 class Mimhean(MDApp):
     def build(self):
@@ -133,31 +280,22 @@ class Mimhean(MDApp):
         })
         self.title = "Mimhean"
         return Builder.load_string(kv)
-    def exibir_conversas(self):
-        """Lista todas as conversas do utilizador."""
-        id_utilizador = self.app.utilizador_atual  # tenho que salvar
-        conversas = self.app.carregar_conversas(id_utilizador)
-
-        lista_conversas = self.ids.lista_conversas  # Criar um ID no layout
-        lista_conversas.clear_widgets()
-
-        for conversa in conversas:
-            item = OneLineListItem(
-                text=conversa["titulo"],
-                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.carregar_conversa(id_conversa)
-            )
-            lista_conversas.add_widget(item)
 
     def carregar_conversa(self, id_conversa):
-        """Carrega mensagens da conversa selecionada."""
-        mensagens = self.app.carregar_mensagens(id_conversa)
-        chat_history = self.ids.chat_history
+        """Carrega mensagens da conversa selecionada."""        
+        mensagens = carregar_mensagens(id_conversa)
+        
+        # Get the ChatScreen instance
+        chat_screen = self.root.get_screen("chat")
+        
+        # Access the chat_history from the ChatScreen instance
+        chat_history = chat_screen.ids.chat_history
         chat_history.clear_widgets()
 
         for msg in mensagens:
             chat_history.add_widget(
                 MDLabel(
-                    text=f"Utilizador: {msg['mensagem_utilizador']}\nIA: {msg['resposta_ia']}",
+                    text=f"Utilizador: {msg['mensagem_utilizador']}\nMimhean: {msg['resposta_ia']}",
                     size_hint_y=None,
                     height=30,
                     text_color=(1, 1, 1, 1),
@@ -166,7 +304,7 @@ class Mimhean(MDApp):
             )
 
     def send_message(self):
-        """Envia uma mensagem e a salva na conversa ativa."""
+        """Envia uma mensagem e a salva na conversa ativa."""        
         chat_screen = self.root.get_screen("chat")
         user_input = chat_screen.ids.user_input.text.strip()
 
@@ -187,40 +325,47 @@ class Mimhean(MDApp):
         chat_screen.ids.user_input.text = ""
 
     def salvar_mensagem(self, id_utilizador, id_conversa, mensagem, resposta):
-        """Salva a interação na base de dados."""
-        from backend.conversas import salvar_mensagem  # Importação dentro do método para evitar dependências circulares
+        """Salva a interação na base de dados."""        
         salvar_mensagem(id_utilizador, id_conversa, mensagem, resposta)
 
-    def exibir_conversas(self):
-        """Lista todas as conversas do utilizador."""
-        if not self.utilizador_atual:
+    def salvar_titulo(self, id_conversa, novo_titulo):
+        """Salva o novo titulo na base de dados."""        
+        salvar_titulo(id_conversa, novo_titulo)
+
+    def get_ai_response(self, user_input):
+        try:
+            response = g4f.ChatCompletion.create(
+                model=g4f.models.gpt_4,
+                messages=[{"role": "user", "content": user_input}]
+            )
+            return response
+        except Exception as e:
+            toast(f"Erro ao gerar resposta: {str(e)}")
+            return "Desculpe, ocorreu um erro ao processar sua mensagem."
+    
+    def nova_conversa(self):
+        """Cria uma nova conversa e atualiza o menu."""
+        app = MDApp.get_running_app()
+        if not app.utilizador_atual:
             toast("Nenhum utilizador logado")
             return
 
-        conversas = carregar_conversas(self.utilizador_atual)  # Obtém conversas do utilizador atual
+        titulo = "Nova Conversa"
+        id_nova_conversa = criar_conversa(app.utilizador_atual, titulo)
 
-        lista_conversas = self.root.get_screen("chat").ids.lista_conversas
-        lista_conversas.clear_widgets()
+        # Atualiza a conversa atual
+        self.conversa_atual = id_nova_conversa
 
-        for conversa in conversas:
-            item = OneLineListItem(
-                text=conversa["titulo"],
-                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.carregar_conversa(id_conversa)
-            )
-            lista_conversas.add_widget(item)
-    
-    def get_ai_response(self, user_input):
-        response = g4f.ChatCompletion.create(
-        model=g4f.models.gpt_4,
-        messages=[{"role": "user", "content": user_input}]
-        )
-        return response
+        # Atualiza a interface
+        chat_screen = self.root.get_screen("chat")
+        chat_screen.carregar_conversas()
+        self.carregar_conversa(id_nova_conversa)
 
     def logout(self):
-        """Desconecta o utilizador e retorna à tela de login."""
+        """Desconecta o utilizador e retorna à tela de login."""        
         self.root.current = "login"
         self.root.transition.direction = "right"
         toast("Logout realizado com sucesso!")   
-    
+
 if __name__ == '__main__':
     Mimhean().run()

@@ -259,6 +259,7 @@ ScreenManager:
                         specific_text_color: 1, 1, 1, 1
                     
                     ScrollView:
+                        do_scroll_y: True
                         MDBoxLayout:
                             id: chat_history
                             orientation: "vertical"
@@ -324,7 +325,7 @@ ScreenManager:
                     text_color: 1, 1, 1, 1
                     size_hint_x: 0.9
                     pos_hint: {"center_x": 0.5}
-                    on_release: app.create_conversation()
+                    on_release: app.nova_conversa()
                 
                 ScrollView:
                     MDList:

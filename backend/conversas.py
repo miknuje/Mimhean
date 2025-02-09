@@ -1,6 +1,8 @@
 from backend.db import *
 
-def criar_conversa(self, id_utilizador, titulo):
+from backend.db import connect_db
+
+def criar_conversa(id_utilizador, titulo):
     """Cria uma nova conversa e retorna seu ID."""
     db = connect_db()
     cursor = db.cursor()
@@ -13,7 +15,7 @@ def criar_conversa(self, id_utilizador, titulo):
     return conversa_id
 
 def salvar_mensagem(id_utilizador, id_conversa, mensagem, resposta):
-    """Salva a interação no base de dados."""
+    """Salva a interação na base de dados."""
     db = connect_db()
     cursor = db.cursor()
     if id_conversa is None:
@@ -25,27 +27,22 @@ def salvar_mensagem(id_utilizador, id_conversa, mensagem, resposta):
     INSERT INTO interacoes (id_utilizador, id_conversa, mensagem_utilizador, resposta_ia) 
     VALUES (%s, %s, %s, %s)
     """
-    if id_conversa is None:
-        toast("Erro: Nenhuma conversa selecionada")
-        return
-    else:
-        cursor.execute(sql, (id_utilizador, id_conversa, mensagem, resposta))
-        db.commit()
-        cursor.close()
-        db.close()
-
-def carregar_conversas(self, id_utilizador):
-    """Recupera todas as conversas do utilizador."""
-    db = connect_db()
-    cursor = db.cursor(dictionary=True)
-    sql = "SELECT id_conversa, titulo, data_criacao FROM conversas WHERE id_utilizador = %s ORDER BY data_criacao DESC"
-    cursor.execute(sql, (id_utilizador,))
-    conversas = cursor.fetchall()
+    cursor.execute(sql, (id_utilizador, id_conversa, mensagem, resposta))
+    db.commit()
     cursor.close()
     db.close()
+
+def carregar_conversas(id_utilizador):
+    cnx = connect_db()
+    cursor = cnx.cursor(dictionary=True)
+    query = "SELECT id_conversa, titulo FROM conversas WHERE id_utilizador = %s"
+    cursor.execute(query, (id_utilizador,))
+    conversas = cursor.fetchall()
+    cursor.close()
+    cnx.close()
     return conversas
 
-def carregar_mensagens(self, id_conversa):
+def carregar_mensagens(id_conversa):
     """Recupera todas as mensagens de uma conversa específica."""
     db = connect_db()
     cursor = db.cursor(dictionary=True)
@@ -55,3 +52,23 @@ def carregar_mensagens(self, id_conversa):
     cursor.close()
     db.close()
     return mensagens
+
+def salvar_titulo(id_conversa, novo_titulo):
+    """Salva o novo título da conversa na base de dados."""
+    db = connect_db()
+    cursor = db.cursor()
+    sql = "UPDATE conversas SET titulo = %s WHERE id_conversa = %s"
+    cursor.execute(sql, (novo_titulo, id_conversa))
+    db.commit()
+    cursor.close()
+    db.close()
+
+def excluir_conversa(id_conversa):
+    """Exclui uma conversa na base de dados."""
+    db = connect_db()
+    cursor = db.cursor()
+    sql = "DELETE FROM conversas WHERE id_conversa = %s"
+    cursor.execute(sql, (id_conversa,))
+    db.commit()
+    cursor.close()
+    db.close()
