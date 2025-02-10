@@ -75,6 +75,9 @@ class LoginScreen(Screen):
                 self.manager.current = "chat"
                 app = MDApp.get_running_app()
                 app.utilizador_atual = user["id_utilizador"]
+
+                chat_screen = self.manager.get_screen("chat")
+                chat_screen.carregar_conversas()
             else:
                 toast("Utilizador ou senha incorretos")
         else:
@@ -124,9 +127,10 @@ class RegisterScreen(Screen):
             cnx.close()
 
 class ChatScreen(Screen):
-    dialog = None  # Armazena a referência ao diálogo
+    dialog = None
+
     def on_enter(self, *args):
-            self.exibir_conversas()
+        self.carregar_conversas()
 
     def editar_titulo(self, id_conversa, titulo_atual):
         """Abre um diálogo para editar o título da conversa."""
@@ -284,11 +288,11 @@ class Mimhean(MDApp):
     def carregar_conversa(self, id_conversa):
         """Carrega mensagens da conversa selecionada."""        
         mensagens = carregar_mensagens(id_conversa)
-        
-        # Get the ChatScreen instance
+
         chat_screen = self.root.get_screen("chat")
-        
-        # Access the chat_history from the ChatScreen instance
+        chat_screen.carregar_conversa(id_conversa)
+        self.conversa_atual = id_conversa
+ 
         chat_history = chat_screen.ids.chat_history
         chat_history.clear_widgets()
 
@@ -366,6 +370,8 @@ class Mimhean(MDApp):
         self.root.current = "login"
         self.root.transition.direction = "right"
         toast("Logout realizado com sucesso!")   
+        self.utilizador_atual = None
+        self.conversa_atual = None
 
 if __name__ == '__main__':
     Mimhean().run()
