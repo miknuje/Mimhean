@@ -298,7 +298,7 @@ ScreenManager:
         
         MDNavigationDrawer:
             id: nav_drawer
-            size_hint_x: 0.6
+            size_hint_x: 0.8
             canvas:
                 Color:
                     rgba: 36/255, 35/255, 35/255, 1 
@@ -330,6 +330,8 @@ ScreenManager:
                 ScrollView:
                     MDList:
                         id: lista_conversas
+                        size_hint_y: None
+                        height: self.minimum_height
                 
                 MDFillRoundFlatButton:
                     text: "Logout"

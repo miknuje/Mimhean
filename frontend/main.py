@@ -133,11 +133,10 @@ class ChatScreen(Screen):
         self.carregar_conversas()
 
     def editar_titulo(self, id_conversa, titulo_atual):
-        """Abre um diálogo para editar o título da conversa."""
         self.dialog = MDDialog(
             title="Editar Título",
             type="custom",
-            content_cls=MDTextField(id="text_field", text=titulo_atual),
+            content_cls=MDTextField(text=titulo_atual),
             buttons=[
                 MDRaisedButton(text="Cancelar", on_release=lambda x: self.dialog.dismiss()),
                 MDRaisedButton(
@@ -148,22 +147,25 @@ class ChatScreen(Screen):
         )
         self.dialog.open()
 
+    def excluir_conversa(self, id_conversa):
+        excluir_conversa(id_conversa)
+        self.carregar_conversas()
+
     def salvar_titulo(self, id_conversa, novo_titulo):
         """Atualiza o título da conversa no banco de dados."""
         salvar_titulo(id_conversa, novo_titulo)
         self.dialog.dismiss()
-        self.carregar_conversas()  # Atualiza a lista de conversas
+        self.carregar_conversas()
 
     def enviar_mensagem(self):
         """Captura a mensagem do usuário, envia para a IA e exibe a resposta."""
         user_input = self.ids.user_input.text.strip()
         if not user_input:
-            return  # Evita enviar mensagens vazias
+            return
 
-        id_conversa = self.ids.chat_screen.id_conversa  # Deve estar definido antes
-        resposta_ia = "Resposta gerada pela IA..."  # Aqui você chamaria a IA de fato
+        id_conversa = self.ids.chat_screen.id_conversa 
+        resposta_ia = "Resposta gerada pela IA..." 
 
-        # Salvar no banco de dados
         salvar_mensagem(self.id_utilizador, id_conversa, user_input, resposta_ia)
 
         # Exibir no chat
@@ -221,14 +223,45 @@ class ChatScreen(Screen):
 
         conversas = carregar_conversas(app.utilizador_atual)
         for conversa in conversas:
+            box = MDBoxLayout(
+                orientation='horizontal',
+                size_hint_y=None,
+                height=48,
+                spacing=2,
+                padding=[2, 0]
+            )
             btn = MDRaisedButton(
                 text=conversa["titulo"],
-                size_hint_x=0.9,
-                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.carregar_conversa(id_conversa)
+                size_hint_x=0.6,
+                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.carregar_conversa(id_conversa),
+                md_bg_color=(94/255, 107/255, 145/255, 1),
+                text_color=(1, 1, 1, 1)
             )
-            lista_conversas.add_widget(btn)
-            print(conversas)
-    
+
+            btn_editar = MDIconButton(
+                icon="pencil",
+                size_hint_x=0.1,
+                on_release=lambda x, id_conversa=conversa["id_conversa"], titulo=conversa["titulo"]: self.editar_titulo(id_conversa, titulo),
+                theme_text_color="Custom",
+                text_color=(1, 1, 1, 1)
+            )
+
+            btn_excluir = MDIconButton(
+                icon="delete",
+                size_hint_x=0.1,
+                on_release=lambda x, id_conversa=conversa["id_conversa"]: self.excluir_conversa(id_conversa),
+                theme_text_color="Custom",
+                text_color=(1, 1, 1, 1)
+            )
+
+            # Adiciona os botões ao BoxLayout horizontal
+            box.add_widget(btn)
+            box.add_widget(btn_editar)
+            box.add_widget(btn_excluir)
+
+            # Adiciona o BoxLayout à lista de conversas
+            lista_conversas.add_widget(box)
+
     def exibir_conversas(self):
         """Lista todas as conversas do utilizador."""
         app = MDApp.get_running_app()
@@ -240,7 +273,6 @@ class ChatScreen(Screen):
         lista_conversas = self.ids.lista_conversas
         lista_conversas.clear_widgets()
 
-        # Criação de um ScrollView para a lista de conversas
         scroll_view = ScrollView(do_scroll_x=False, do_scroll_y=True)
         scroll_layout = MDBoxLayout(orientation='vertical', size_hint_y=None)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
@@ -266,11 +298,9 @@ class ChatScreen(Screen):
             item_layout.add_widget(item)
             item_layout.add_widget(btn_editar)
             item_layout.add_widget(btn_excluir)
-            
-            # Adiciona o item de conversa no layout de rolagem
+
             scroll_layout.add_widget(item_layout)
 
-        # Adiciona o layout de rolagem na tela
         scroll_view.add_widget(scroll_layout)
         lista_conversas.add_widget(scroll_view)
 
