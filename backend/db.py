@@ -152,8 +152,8 @@ CREATE TABLE IF NOT EXISTS conversas (
 
 def create_database(cursor):
     try:
-        cursor.execute("CREATE DATABASE IF NOT EXISTS projeto_ia DEFAULT CHARACTER SET 'utf8mb4'")
-        print("Base de dados 'projeto_ia' criado ou já existente.")
+        cursor.execute("CREATE DATABASE IF NOT EXISTS mimhean DEFAULT CHARACTER SET 'utf8mb4'")
+        print("Base de dados 'mimhean' criado ou já existente.")
     except mysql.connector.Error as err:
         print(f"Erro ao criar o Base de dados: {err}")
         exit(1)

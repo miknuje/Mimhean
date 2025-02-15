@@ -259,6 +259,7 @@ ScreenManager:
                         specific_text_color: 1, 1, 1, 1
                     
                     ScrollView:
+                        id: scroll_view
                         do_scroll_y: True
                         MDBoxLayout:
                             id: chat_history
@@ -340,6 +341,5 @@ ScreenManager:
                     size_hint_x: 0.9
                     pos_hint: {"center_x": 0.5}
                     on_release: app.logout()
-
 
 """
