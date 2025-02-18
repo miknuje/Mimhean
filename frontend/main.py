@@ -303,6 +303,7 @@ class ChatScreen(Screen):
 
     def exibir_conversa(self, id_conversa):
         """Exibe as mensagens de uma conversa específica na tela de chat."""
+        self.conversa_atual = id_conversa
         mensagens = carregar_mensagens(id_conversa)  # Carrega as mensagens do banco de dados
 
         chat_screen = self.root.get_screen("chat")
@@ -326,6 +327,7 @@ class Mimhean(MDApp):
 
     def exibir_conversa(self, id_conversa):
         """Exibe as mensagens de uma conversa específica na tela de chat."""
+        self.conversa_atual = id_conversa
         mensagens = carregar_mensagens(id_conversa)  # Carrega as mensagens do banco de dados
 
         chat_screen = self.root.get_screen("chat")
