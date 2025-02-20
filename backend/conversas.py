@@ -19,7 +19,6 @@ def salvar_mensagem(id_utilizador, id_conversa, mensagem, resposta):
     db = connect_db()
     cursor = db.cursor()
     if id_conversa is None:
-        # Criar uma nova conversa se não houver uma ativa
         cursor.execute("INSERT INTO conversas (id_utilizador, titulo) VALUES (%s, %s)", (id_utilizador, "Nova Conversa"))
         db.commit()
         id_conversa = cursor.lastrowid

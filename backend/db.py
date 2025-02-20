@@ -2,12 +2,11 @@ import mysql.connector
 from mysql.connector import errorcode
 from kivymd.toast import toast
 
-# Configurações de conexão com o MySQL
 config = {
-    'user': 'root',  # Substitua pelo seu utilizador MySQL
-    'password': '',  # Substitua pela sua senha
-    'host': 'localhost',  # Ou o IP do servidor MySQL
-    'database': 'mimhean',  # Nome da Base de dados
+    'user': 'root',
+    'password': '', 
+    'host': 'localhost',
+    'database': 'mimhean', 
 }
 
 def connect_db():
@@ -21,7 +20,7 @@ def connect_db():
         else:
             toast(f"Erro: {err}")
     return None
-# Script SQL para criação da Base de dados e tabelas
+
 TABLES = {}
 
 TABLES['dados_treinamento'] = (
@@ -179,21 +178,16 @@ def update_tables(cursor):
 
 def main():
     try:
-        # Conectar ao servidor MySQL
         cnx = mysql.connector.connect(user=config['user'], password=config['password'], host=config['host'])
         cursor = cnx.cursor()
 
-        # Criar Base de dados se não existir
         create_database(cursor)
 
-        # Selecionar a Base de dados
         cnx.database = config['database']
         
-        # Criar tabelas
         create_tables(cursor)
         update_tables(cursor)
 
-        # Fechar conexões
         cursor.close()
         cnx.close()
         print("Processo concluído com sucesso!")

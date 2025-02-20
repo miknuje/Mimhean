@@ -28,10 +28,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from backend.conversas import carregar_conversas, criar_conversa, salvar_mensagem, salvar_titulo, excluir_conversa, carregar_mensagens
 
 config = {
-    'user': 'root',  # Substitua pelo seu utilizador MySQL
-    'password': '',  # Substitua pela sua senha
-    'host': 'localhost',  # Ou o IP do servidor MySQL
-    'database': 'mimhean',  # Nome da Base de dados
+    'user': 'root',
+    'password': '',
+    'host': 'localhost', 
+    'database': 'mimhean',
 }
 
 def connect_db():
@@ -168,60 +168,53 @@ class ChatScreen(Screen):
 
         salvar_mensagem(self.id_utilizador, id_conversa, user_input, resposta_ia)
 
-        # Exibir no chat
         self.display_message("Utilizador", user_input)
         self.display_message("IA", resposta_ia)
 
-        # Limpar campo de entrada
         self.ids.user_input.text = ""
 
     def display_message(self, sender, message):
         """Exibe uma mensagem no chat com balão ajustável e responsivo."""
-        chat_history = self.ids.chat_history  # MDBoxLayout que contém as mensagens
-        scroll_view = self.ids.scroll_view  # ScrollView que contém o MDBoxLayout
+        chat_history = self.ids.chat_history  
+        scroll_view = self.ids.scroll_view  
 
-        is_user = sender == "Utilizador"  # Verifica se a mensagem é do usuário
+        is_user = sender == "Utilizador" 
 
-        # Container da mensagem
         message_container = MDBoxLayout(
             size_hint_x=None,
-            width=dp(300),  # Largura máxima do balão
+            width=dp(300), 
             padding=[10, 5],
             adaptive_height=True,
-            pos_hint={"right": 1} if is_user else {"left": 0}  # Alinha à direita ou esquerda
+            pos_hint={"right": 1} if is_user else {"left": 0}  
         )
 
-        # Balão da mensagem
         bubble = MDCard(
             elevation=2,
-            radius=[15, 15, 0, 15] if is_user else [15, 15, 15, 0],  # Bordas arredondadas
-            md_bg_color=(0.2, 0.6, 1, 1) if is_user else (0.2, 0.2, 0.2, 1),  # Cor do balão
+            radius=[15, 15, 0, 15] if is_user else [15, 15, 15, 0],
+            md_bg_color=(0.2, 0.6, 1, 1) if is_user else (0.2, 0.2, 0.2, 1),
             padding=[10, 10],
             size_hint_x=None,
-            width=dp(280),  # Largura do balão
+            width=dp(280),
             adaptive_height=True
         )
 
-        # Texto da mensagem
         message_label = MDLabel(
             text=message,
             theme_text_color="Custom",
-            text_color=(1, 1, 1, 1),  # Cor do texto
-            halign="right" if is_user else "left",  # Alinhamento do texto
+            text_color=(1, 1, 1, 1),  
+            halign="right" if is_user else "left",  
             size_hint_x=None,
-            width=dp(260),  # Largura do texto
+            width=dp(260),
             size_hint_y=None,
             adaptive_height=True
         )
 
-        # Adiciona o texto ao balão
         bubble.add_widget(message_label)
-        # Adiciona o balão ao container
+
         message_container.add_widget(bubble)
-        # Adiciona o container ao histórico de chat
+
         chat_history.add_widget(message_container)
 
-        # Rola o histórico para a última mensagem
         scroll_view.scroll_to(message_container)
 
     def carregar_conversas(self):
@@ -232,9 +225,8 @@ class ChatScreen(Screen):
             return
 
         lista_conversas = self.ids.lista_conversas
-        lista_conversas.clear_widgets()  # Limpa a lista de conversas atual
+        lista_conversas.clear_widgets()
 
-        # Carrega as conversas do banco de dados
         conversas = carregar_conversas(app.utilizador_atual)
 
         for conversa in conversas:
@@ -246,7 +238,6 @@ class ChatScreen(Screen):
                 padding=[2, 0]
             )
 
-            # Botão para exibir a conversa
             btn = MDRaisedButton(
                 text=conversa["titulo"],
                 size_hint_x=0.6,
@@ -255,7 +246,6 @@ class ChatScreen(Screen):
                 text_color=(1, 1, 1, 1)
             )
 
-            # Botão para editar o título da conversa
             btn_editar = MDIconButton(
                 icon="pencil",
                 size_hint_x=0.1,
@@ -264,7 +254,6 @@ class ChatScreen(Screen):
                 text_color=(1, 1, 1, 1)
             )
 
-            # Botão para excluir a conversa
             btn_excluir = MDIconButton(
                 icon="delete",
                 size_hint_x=0.1,
@@ -273,12 +262,10 @@ class ChatScreen(Screen):
                 text_color=(1, 1, 1, 1)
             )
 
-            # Adiciona os botões ao BoxLayout
             box.add_widget(btn)
             box.add_widget(btn_editar)
             box.add_widget(btn_excluir)
 
-            # Adiciona o BoxLayout à lista de conversas
             lista_conversas.add_widget(box)
 
     def carregar_conversa(self, id_conversa):
@@ -304,14 +291,14 @@ class ChatScreen(Screen):
     def exibir_conversa(self, id_conversa):
         """Exibe as mensagens de uma conversa específica na tela de chat."""
         self.conversa_atual = id_conversa
-        mensagens = carregar_mensagens(id_conversa)  # Carrega as mensagens do banco de dados
+        mensagens = carregar_mensagens(id_conversa) 
 
         chat_screen = self.root.get_screen("chat")
-        chat_screen.ids.chat_history.clear_widgets()  # Limpa o histórico de chat
+        chat_screen.ids.chat_history.clear_widgets()
 
         for msg in mensagens:
-            chat_screen.display_message("Utilizador", msg["mensagem_utilizador"])  # Exibe a mensagem do usuário
-            chat_screen.display_message("IA", msg["resposta_ia"])  # Exibe a resposta do bot
+            chat_screen.display_message("Utilizador", msg["mensagem_utilizador"]) 
+            chat_screen.display_message("IA", msg["resposta_ia"])  
 
 
 class Mimhean(MDApp):
@@ -328,14 +315,14 @@ class Mimhean(MDApp):
     def exibir_conversa(self, id_conversa):
         """Exibe as mensagens de uma conversa específica na tela de chat."""
         self.conversa_atual = id_conversa
-        mensagens = carregar_mensagens(id_conversa)  # Carrega as mensagens do banco de dados
+        mensagens = carregar_mensagens(id_conversa)  
 
         chat_screen = self.root.get_screen("chat")
-        chat_screen.ids.chat_history.clear_widgets()  # Limpa o histórico de chat
+        chat_screen.ids.chat_history.clear_widgets()
 
         for msg in mensagens:
-            chat_screen.display_message("Utilizador", msg["mensagem_utilizador"])  # Exibe a mensagem do usuário
-            chat_screen.display_message("IA", msg["resposta_ia"])  # Exibe a resposta do bot
+            chat_screen.display_message("Utilizador", msg["mensagem_utilizador"]) 
+            chat_screen.display_message("IA", msg["resposta_ia"])
 
     def carregar_conversa(self, id_conversa):
         """Carrega mensagens da conversa selecionada."""        
