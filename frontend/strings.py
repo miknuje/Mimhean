@@ -79,6 +79,13 @@ ScreenManager:
         spacing: 20
         padding: 20
 
+        FloatLayout:
+            Image:
+                source: 'assets/images/logo.png'
+                size_hint: None, None
+                size: 200, 200
+                pos_hint: {"center_x": 0.5, "center_y": 0.2}
+
         MDLabel:
             text: "Login"
             halign: "center"
@@ -336,7 +343,7 @@ ScreenManager:
                 
                 MDFillRoundFlatButton:
                     text: "Logout"
-                    md_bg_color: 255/255, 69/255, 58/255, 1
+                    md_bg_color: 87/255, 131/255, 135/255, 1
                     text_color: 1, 1, 1, 1
                     size_hint_x: 0.9
                     pos_hint: {"center_x": 0.5}
