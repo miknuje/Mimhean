@@ -152,13 +152,13 @@ class ChatScreen(Screen):
         self.carregar_conversas()
 
     def salvar_titulo(self, id_conversa, novo_titulo):
-        """Atualiza o título da conversa no banco de dados."""
+        """Atualiza o título da conversa na base de dados."""
         salvar_titulo(id_conversa, novo_titulo)
         self.dialog.dismiss()
         self.carregar_conversas()
 
     def enviar_mensagem(self):
-        """Captura a mensagem do usuário, envia para a IA e exibe a resposta."""
+        """Captura a mensagem do utilizador, envia para a IA e exibe a resposta."""
         user_input = self.ids.user_input.text.strip()
         if not user_input:
             return

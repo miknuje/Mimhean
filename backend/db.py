@@ -178,7 +178,7 @@ def update_tables(cursor):
 
 def main():
     try:
-        cnx = mysql.connector.connect(user=config['user'], password=config['password'], host=config['host'])
+        cnx = connect_db()
         cursor = cnx.cursor()
 
         create_database(cursor)
