@@ -25,7 +25,7 @@ ScreenManager:
                 pos_hint: {"center_x": 0.5, "center_y": 0.7}
 
         MDLabel:
-            text: "Welcome to Mimhean"
+            text: "Welcome to Mimhean! Create your account!"
             halign: "center"
             theme_text_color: "Custom"
             text_color: 1, 1, 1, 1
@@ -87,7 +87,7 @@ ScreenManager:
                 pos_hint: {"center_x": 0.5, "center_y": 0.2}
 
         MDLabel:
-            text: "Login"
+            text: "You're still late!"
             halign: "center"
             theme_text_color: "Custom"
             text_color: 1, 1, 1, 1
@@ -159,7 +159,7 @@ ScreenManager:
         padding: 20
 
         MDLabel:
-            text: "Register"
+            text: "You were late! Register faster"
             halign: "center"
             theme_text_color: "Custom"
             text_color: 1, 1, 1, 1
